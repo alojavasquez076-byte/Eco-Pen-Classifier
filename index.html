@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartSorter AI | Community Upcycling & Waste Classifier</title>
+    <!-- Google Fonts for clean Typography (Visual Hierarchy) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* =========================================
+           DESIGN PRINCIPLES APPLIED IN CSS:
+           1. Contrast: Dark slate text on soft off-white, vibrant emerald accents.
+           2. White Space: Generous padding and margins so elements breathe.
+           3. Alignment: CSS Grid and Flexbox for crisp edges.
+           4. Balance: Symmetrical two-column desktop layout.
+           ========================================= */
+        :root {
+            --primary: #10b981;       /* Eco Emerald */
+            --primary-dark: #059669;
+            --secondary: #3b82f6;     /* Tech Blue */
+            --bg-main: #f8fafc;       /* Soft Off-White */
+            --bg-card: #ffffff;       /* Crisp White */
+            --text-dark: #0f172a;     /* High-Contrast Slate */
+            --text-muted: #475569;
+            --border: #e2e8f0;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* Header & Visual Hierarchy */
+        header {
+            background: linear-gradient(135deg, #064e3b 0%, #0f172a 100%);
+            color: white;
+            padding: 3.5rem 1.5rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.75rem;
+        }
+
+        header p {
+            max-width: 600px;
+            margin: 0 auto;
+            color: #cbd5e1;
+            font-size: 1.1rem;
+        }
+
+        /* Main Container (Alignment & Balance) */
+        .container {
+            max-width: 1100px;
+            margin: -2rem auto 3rem auto;
+            padding: 0 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 850px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card Component (Proximity & Repetition) */
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .card h2 {
+            font-size: 1.35rem;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Interactive AI Section */
+        .scanner-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        #canvas-container {
+            width: 260px;
+            height: 260px;
+            background: #f1f5f9;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1.25rem 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Button with Clear Emphasis */
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 0.85rem 2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Prediction Progress Bars */
+        #label-container {
+            width: 100%;
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            text-align: left;
+        }
+
+        .prediction-item {
+            background: #f8fafc;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .prediction-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .progress-bg {
+            width: 100%;
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.15s ease;
+        }
+
+        /* Community Significance List (Proximity & Contrast) */
+        .impact-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            margin-top: 1rem;
+        }
+
+        .impact-item {
+            padding-left: 1rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        .impact-item h3 {
+            font-size: 1.05rem;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .impact-item p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            border-top: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER: Visual Hierarchy & Contrast -->
+    <header>
+        <h1>SmartSorter AI</h1>
+        <p>Empowering communities to distinguish everyday items from upcycled and recyclable materials using real-time pose and object recognition.</p>
+    </header>
+
+    <!-- MAIN CONTENT: Balanced Two-Column Layout -->
+    <main class="container">
+        
+        <!-- LEFT COLUMN: Interactive AI Scanner -->
+        <section class="card scanner-box">
+            <h2>Live AI Classifier</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">
+                Show a <strong>Pen</strong> or <strong>Recyclable Craft Material</strong> to your webcam to test the model.
+            </p>
+
+            <div id="canvas-container">
+                <span id="placeholder-text" style="color: #64748b; font-size: 0.9rem; padding: 1rem;">
+                    Camera is off. Click below to start.
+                </span>
+                <canvas id="canvas" style="display: none;"></canvas>
+            </div>
+
+            <button class="btn" id="start-btn" onclick="init()">Start Camera</button>
+
+            <div id="label-container"></div>
+        </section>
+
+        <!-- RIGHT COLUMN: Significance to the Community -->
+        <section class="card">
+            <h2>Significance to the Community</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">
+                Proper waste segregation starts with quick, accessible education. SmartSorter AI bridges technology and sustainability:
+            </p>
+
+            <div class="impact-list">
+                <div class="impact-item">
+                    <h3>1. Reducing Landfill Waste</h3>
+                    <p>Helps households and students instantly identify recyclable materials that can be repurposed into crafts instead of being thrown away.</p>
+                </div>
+
+                <div class="impact-item" style="border-left-color: var(--secondary);">
+                    <h3>2. Promoting Creative Upcycling</h3>
+                    <p>Demonstrates how everyday waste (like cardboard and plastic bottles) can be transformed into functional art, inspiring local eco-projects.</p>
+                </div>
+
+                <div class="impact-item">
+                    <h3>3. Accessible Environmental Education</h3>
+                    <p>Provides an interactive, hands-on tool for schools and barangays to teach proper sorting habits using accessible browser-based AI.</p>
+                </div>
+
+                <div class="impact-item" style="border-left-color: var(--secondary);">
+                    <h3>4. Preventing Recycling Contamination</h3>
+                    <p>Separating non-recyclable everyday items (like mixed-plastic pens) from pure recyclable crafts keeps community recycling streams clean.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>Built with Google Teachable Machine & Hosted on GitHub Pages</p>
+    </footer>
+
+    <!-- Teachable Machine Pose & TensorFlow Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/pose@0.8/dist/teachablemachine-pose.min.js"></script>
+
+    <script type="text/javascript">
+        // Your specific Teachable Machine Pose Model URL
+        const URL = "https://teachablemachine.withgoogle.com/models/3wBw3Hj5i/";
+        let model, webcam, ctx, labelContainer, maxPredictions;
+
+        async function init() {
+            const btn = document.getElementById("start-btn");
+            btn.disabled = true;
+            btn.innerText = "Loading AI Model...";
+
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            try {
+                // Load the pose model and metadata
+                model = await tmPose.load(modelURL, metadataURL);
+                maxPredictions = model.getTotalClasses();
+
+                // Setup webcam
+                const size = 260;
+                const flip = true; 
+                webcam = new tmPose.Webcam(size, size, flip);
+                await webcam.setup(); 
+                await webcam.play();
+                window.requestAnimationFrame(loop);
+
+                // Show canvas and hide placeholder
+                document.getElementById("placeholder-text").style.display = "none";
+                const canvas = document.getElementById("canvas");
+                canvas.style.display = "block";
+                canvas.width = size; 
+                canvas.height = size;
+                ctx = canvas.getContext("2d");
+
+                // Build clean progress bar UI for each class
+                labelContainer = document.getElementById("label-container");
+                labelContainer.innerHTML = "";
+                for (let i = 0; i < maxPredictions; i++) {
+                    const item = document.createElement("div");
+                    item.className = "prediction-item";
+                    item.innerHTML = `
+                        <div class="prediction-header">
+                            <span class="class-name">Loading...</span>
+                            <span class="class-prob">0%</span>
+                        </div>
+                        <div class="progress-bg">
+                            <div class="progress-fill"></div>
+                        </div>
+                    `;
+                    labelContainer.appendChild(item);
+                }
+
+                btn.innerText = "Camera Active";
+            } catch (error) {
+                console.error(error);
+                btn.disabled = false;
+                btn.innerText = "Retry Camera";
+                alert("Could not access webcam or load model. Please allow camera permissions and ensure you are using HTTPS (GitHub Pages).");
+            }
+        }
+
+        async function loop(timestamp) {
+            webcam.update();
+            await predict();
+            window.requestAnimationFrame(loop);
+        }
+
+        async function predict() {
+            // Estimate pose and run classification
+            const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
+            const prediction = await model.predict(posenetOutput);
+
+            const items = labelContainer.getElementsByClassName("prediction-item");
+
+            for (let i = 0; i < maxPredictions; i++) {
+                const className = prediction[i].className;
+                const probability = (prediction[i].probability * 100).toFixed(0);
+
+                items[i].querySelector(".class-name").innerText = className;
+                items[i].querySelector(".class-prob").innerText = probability + "%";
+                items[i].querySelector(".progress-fill").style.width = probability + "%";
+            }
+
+            drawPose(pose);
+        }
+
+        function drawPose(pose) {
+            if (webcam.canvas) {
+                ctx.drawImage(webcam.canvas, 0, 0);
+                if (pose) {
+                    const minPartConfidence = 0.5;
+                    tmPose.drawKeypoints(pose.keypoints, minPartConfidence, ctx);
+                    tmPose.drawSkeleton(pose.keypoints, minPartConfidence, ctx);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
